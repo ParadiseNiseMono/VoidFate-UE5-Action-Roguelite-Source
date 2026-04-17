@@ -1,5 +1,5 @@
 # VoidFate-UE5-Action-Roguelite-Source
-  這是我花了四個月單人開發的專案。為了確保效能與可擴展性，我捨棄了純藍圖開發。 底層戰鬥我深入客製化了 GAS 的 ExecCalc 與 Ability Tasks； 系統架構我全面採用 Subsystem 與 Interface 避免硬引用； UI 層我利用 C++ Data Object 結合 CommonUI 實作虛擬化列表，徹底解決了 UI Tick 效能瓶頸。 這不僅是一款遊戲 Demo，更是一個以 3A 專案標準打造的系統架構雛形。
+這是我花了四個月單人開發的專案。為了確保效能與可擴展性，我捨棄了純藍圖開發。 底層戰鬥我深入客製化了 GAS 的 ExecCalc 與 Ability Tasks； 系統架構我全面採用 Subsystem 與 Interface 避免硬引用； UI 層我利用 C++ Data Object 結合 CommonUI 實作虛擬化列表，徹底解決了 UI Tick 效能瓶頸。 這不僅是一款遊戲 Demo，更是一個以 3A 專案標準打造的系統架構雛形。
 
 # ⚔️ Void Fate - Technical Architecture & Deep Dive
 《Void Fate》 是一款基於 Unreal Engine 5 開發的 3D 動作生存遊戲。
@@ -243,4 +243,34 @@ UPawnCombatComponent* UVFFunctionLibrary::BP_GetPawnCombatComponentFromActor(AAc
 極速的企劃迭代：如果明天企劃要求新增一個「只有 UI 但不能戰鬥的 NPC」，我只需要給他掛載 PawnUIComponent，完全不用寫新類別，也不用擔心戰鬥代碼報錯。
 
 安全的團隊協作：處理 UI 的工程師與處理戰鬥的工程師，可以分別在 PawnUIComponent.cpp 與 PawnCombatComponent.cpp 中工作，永遠不會發生 Git Merge 衝突 (Merge Conflicts)。
+</details>
+
+# 5. 視覺打磨與沉浸感：程式化運鏡與無縫載入架構
+在動作遊戲中，極致的打擊感與視覺回饋是靈魂。然而，許多專案為了追求畫面張力，常將運鏡、濾鏡與 UI 邏輯硬塞入 Character 或 PlayerController 中，導致難以維護。《Void Fate》在視覺系統的實作上，嚴格遵守了邏輯抽離與非同步處理的業界標準。
+<details>
+	<summary>點擊展開說明</summary>
+
+## 5.1 抽離攝影機邏輯：自定義 Camera Modifiers
+當玩家的刀劍命中敵人時，我們需要「FOV 瞬間縮放」來營造衝擊力；當進入特殊狀態時，我們需要「全螢幕濾鏡 (Post-Process)」。為了不讓這些邏輯污染核心腳本，本專案深度利用了 Unreal Engine 的 UCameraModifier 系統。
+
+VFCameraModifier_FOVImpact：專責處理動態 FOV 的衝擊與平滑還原。
+
+VFCameraModifier_PostProcess：動態注入並管理後處理材質的權重與生命週期。
+
+架構優勢：當戰鬥系統需要視覺回饋時，只需將這些 Modifier 動態注入 (Add Modifier) 到 PlayerCameraManager 中。這使得**「戰鬥運算」與「攝影機運鏡」徹底分離**，設計師可以輕鬆疊加多種運鏡效果而不必擔心邏輯衝突。
+
+## 5.2 GAS 與視覺的完美橋接：運鏡專屬 Ability Tasks
+在 GAS 的標準流程中，GameplayAbility (GA) 應專注於數值與狀態的流轉。為了在施放技能或處決時加入華麗的運鏡，我將視覺表現封裝成了專屬的非同步任務：
+
+AbilityTask_PlayCinematicCamera：當觸發處決技能時，透過此 Task 呼叫 VFExecutionCameraSubsystem 接管主攝影機，播放預先設定的 Cinematic 運鏡。
+
+企劃只需在技能藍圖中串接此 Task 節點，即可在精確的技能幀觸發電影級運鏡，完美兼顧了代碼潔癖與視覺華麗度。
+
+## 5.3 企業級無縫體驗：非同步 Loading Screen Subsystem
+除了戰鬥表現，遊戲的整體流暢度也至關重要。在關卡切換時，如果只使用預設的 OpenLevel，會導致主執行緒阻塞 (Thread Blocking)，畫面陷入死當或黑屏。
+
+為了達到 3A 級別的無縫體驗，我實作了：
+
+VFLoadingScreenSubsystem & VFLoadingScreenInterface：
+在 C++ 系統層級攔截 Level 載入事件。利用非同步關卡載入 (Async Level Loading) 的特性，在背景載入資源的同時，於前端渲染高質感的過場 UI 與提示字卡，徹底消除玩家在等待時的焦慮感與出戲感。
 </details>

@@ -66,7 +66,7 @@ Rogue-like 動態獎勵系統：結合自定義的 VFRewardSubsystem，玩家在
 3.2 徹底解耦的 UI 屬性廣播 (Delegate Events)
 在傳統做法中，UI 經常透過 Tick 去抓取玩家血量，這會造成極大的效能浪費與高耦合。
 本專案在 VFAttributeSet 中實作了完整的 Delegate 廣播機制。當 GAS 內部的屬性（如 Health、Posture）發生變化時，會主動發送 Event。前端的 UI 組件僅需綁定這些 Delegate 即可被動更新，UI 系統完全不知道 GAS 的存在，實現了底層數值與前端視覺的完美解耦。
-<img width="3837" height="2159" alt="螢幕擷取畫面 2026-04-17 195945" src="https://github.com/user-attachments/assets/a451b071-6d7a-4dfe-a4fe-59b3f0a85649" />
+<img width="1280" height="720" alt="螢幕擷取畫面 2026-04-17 195945" src="https://github.com/user-attachments/assets/a451b071-6d7a-4dfe-a4fe-59b3f0a85649" />
 
 3.3 突破壁壘：GAS 與 AI 行為樹的深度整合 (AI Target Lock-on)
 這是本專案最具技術含量的挑戰之一。傳統 AI 行為樹難以精準控制複雜的技能邏輯，為此我開發了專屬的行為樹節點：
@@ -79,6 +79,27 @@ BTTask_ActivateAbilityWithTarget：這讓 AI 能夠直接從行為樹根據 Blac
 實戰效果：不論玩家如何靈活位移，敵方的追擊技能都能從 TargetData 中實時解算玩家座標，實現壓迫感極強的高難度追蹤攻擊。
 https://github.com/user-attachments/assets/92e18d52-22bc-4ec7-929a-04ec0e14ba04
 
+3.4 極致的打擊感與時機控制 (Anim Notify & Gameplay Events)
+為了讓戰鬥的「判定幀」達到動作遊戲的極致精準，我拒絕使用粗糙的 Anim Notify State 碰撞：
 
+Gameplay Event 驅動：透過自定義的 Anim Notify（如 VFAnimNotify_PostProcessFlash 等），在攻擊動畫最精確的打擊幀向 Ability System 發送 GameplayEvent。
 
+GA 在收到 Event 後才正式觸發 GEExecCalc_DamageTaken 計算傷害。這確保了「視覺動作」與「底層數值計算」的絕對同步。
+
+3.5 動態數值運算：MMC 與 ExecCalc 的進階應用
+本專案的數值公式並非簡單的加減乘除，而是充分利用了 GAS 的進階運算類別：
+
+客製化處決與傷害計算 (GEExecCalc_DamageTaken)：在 C++ 中攔截傷害事件，綜合計算護甲、架勢值 (Posture)、以及處決狀態，計算出最終的真實傷害。
+
+自定義修飾符 (MMC_PostureRecoveryRate)：
+為增加遊戲深度，實作了動態架勢恢復邏輯。透過 C++ 的 MMC (Modifier Magnitude Calculation)，即時抓取玩家的「當前血量比例」來動態影響「架勢恢復率」（例如：血量越低，架勢恢復越慢）。這種複雜的動態關聯，充分展現了對 GAS Pipeline 的掌握。
+
+3.6 視覺與程式碼的交響樂：Custom Ability Tasks
+為了讓 GameplayAbility 的腳本保持純粹的戰鬥邏輯，我將所有「非數值」的視覺回饋剝離，封裝成獨立的非同步任務 (Ability Tasks)：
+
+AbilityTask_PlayCinematicCamera：專門處理處決或大招時的運鏡切換。
+
+AbilityTask_ExecuteTaskOnTick 等：處理如殘影濾鏡、畫面震動 (Camera Shake) 或後處理 (Post-Process) 閃爍。
+
+優勢：技能設計者 (企劃) 可以像拼圖一樣，在 GA 藍圖中串接這些 Task，既能保證視覺的華麗度，又不會污染核心的傷害運算邏輯。
 

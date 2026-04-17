@@ -1,0 +1,40 @@
+// Paradise NiseMono All Rights Reserved
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Kismet/BlueprintAsyncActionBase.h"
+#include "VFTypes/VFEnumTypes.h"
+#include "AsyncAction_PushConfirmScreen.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConfirmScreenButtonClickedDelegate, EConfirmScreenButtonType, ClickedButtonType);
+
+/**
+ * 
+ */
+UCLASS()
+class VOIDFATE_API UAsyncAction_PushConfirmScreen : public UBlueprintAsyncActionBase
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, meta=(WorldContext = "WorldContextObject", HidePin = "WorldContextObject", BlueprintInternalUseOnly = "true", DisplayName = "Show Confirmation Screen"))
+	static UAsyncAction_PushConfirmScreen* ShowConfirmScreen(
+		UObject* WorldContextObject,
+		EConfirmScreenType ScreenType,
+		FText InScreenTitle,
+		FText InScreenMsg
+		);
+
+	// ~Begin UBlueprintAsyncActionBase Interface
+	virtual void Activate() override;
+	// ~End UBlueprintAsyncActionBase Interface
+
+	UPROPERTY(BlueprintAssignable)
+	FOnConfirmScreenButtonClickedDelegate OnButtonClicked;
+private:
+	TWeakObjectPtr<UWorld> CachedOwningWorld;
+	EConfirmScreenType CachedScreenType;
+	FText CachedScreenMsg;
+	FText CachedScreenTitle;
+};

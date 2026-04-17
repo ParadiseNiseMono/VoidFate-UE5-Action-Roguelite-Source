@@ -5,7 +5,7 @@
 這是我花了四個月單人開發的專案。為了確保效能與可擴展性，我捨棄了純藍圖開發。 底層戰鬥我深入客製化了 GAS 的 ExecCalc 與 Ability Tasks； 系統架構我全面採用 Subsystem 與 Interface 避免硬引用； UI 層我利用 C++ Data Object 結合 CommonUI 實作虛擬化列表，徹底解決了 UI Tick 效能瓶頸。 這不僅是一款遊戲 Demo，更是一個以 3A 專案標準打造的系統架構雛形。
 
 # ⚔️ Void Fate - Technical Architecture & Deep Dive
-《Void Fate》 是一款基於 Unreal Engine 5 開發的 3D 動作生存遊戲。
+《Void Fate》 是一款基於 Unreal Engine 5 開發的 3D 動作Roguelite遊戲。
 本專案的核心目標不在於完成一款商業遊戲，而是展現現代化 UE5 C++ 客戶端開發的業界標準。全專案高度採用模組化 (Modular)、資料驅動 (Data-Driven) 以及低耦合 (Decoupling) 的架構設計。
 
 ## 🕒 開發者旅程 (The Journey)

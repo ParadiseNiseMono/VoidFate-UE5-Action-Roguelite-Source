@@ -25,7 +25,7 @@ AI System: Behavior Tree / Custom BTTask & BTService
 Architecture: Subsystems / Actor Components / Data-Driven Design****
 
 
-# 1. 核心程式哲學：高度解耦的模組化設計 (Modular Architecture)
+# 1. 高度解耦的模組化設計 (Modular Architecture)
 為了保證專案的極高可擴展性，並確保在後續除錯時能快速定位問題，本專案嚴格遵守「邏輯分離」與「低耦合」原則。
 <details>
 <summary>點擊展開說明</summary>
@@ -50,7 +50,7 @@ VFRewardSubsystem: 管理 Rogue-lite 機制下的動態獎勵派發。
 </details>
 
 
-# 2. 前端革命：資料驅動的 UI 與 Common UI 實戰
+# 2. 資料驅動的 UI 與 Common UI 實戰
 開發初期最耗費心力，為解決「難以維護」與「手把熱切換焦點遺失」痛點而生。
 <details>
 <summary>點擊展開說明</summary>
@@ -183,7 +183,7 @@ AbilityTask_ExecuteTaskOnTick 等：處理如殘影濾鏡、畫面震動 (Camera
   
 </details>
 
-# 4. 架構基石：高度解耦的 Component 模組化與 Interface 溝通
+# 4. 高度解耦的 Component 模組化與 Interface 溝通
 在許多傳統的 Unreal 專案中，開發者常犯的錯誤是將所有的戰鬥、UI 更新與輸入邏輯全部塞入 ACharacter 類別中，這會導致類別過度膨脹（God Class）且難以維護。《Void Fate》嚴格遵守單一職責原則 (SRP)，採用「組合優於繼承 (Composition over Inheritance)」的設計模式，將邏輯徹底抽離。
 <details>
 <summary>點擊展開說明</summary>
